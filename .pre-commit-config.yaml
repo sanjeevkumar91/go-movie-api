@@ -1,0 +1,9 @@
+repos:
+-   repo: local
+    hooks:
+      - id: prepush_check
+        name: Run prepush checks
+        entry: make run_prepush
+        language: system
+        types: [go]
+        stages: [pre-commit, pre-push]
