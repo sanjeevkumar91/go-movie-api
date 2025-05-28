@@ -1,4 +1,4 @@
-rollbackCount ?= 1
+rollbackCount ?= 3
 
 install_deps:
 	chmod +x scripts/install.sh
@@ -22,9 +22,6 @@ run_prepush:
 	$(MAKE) run_format
 	$(MAKE) run_tests
 	$(MAKE) run_lint
-
-run_liquibase_in_go:
-	go run cmd/main.go
 
 run_migrations:
 	liquibase update

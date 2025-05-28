@@ -7,7 +7,7 @@ To install dependencies
 - run `make install_deps`
 
 # To run the app
-- run `go run cmd/main.go`
+- run `make start`
 
 useful references:
 https://github.com/golang-standards/project-layout/tree/master/cmd

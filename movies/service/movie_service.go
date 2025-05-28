@@ -19,7 +19,7 @@ type MovieService interface {
 	SearchMovies(ctx *gin.Context, req model.SearchMovieRequest) (resp []model.Movie, err error)
 	GetMovieDetails(ctx *gin.Context, req model.GetMovieDetailsRequest) (resp model.GetMovieDetailsResponse, err error)
 	AddMovieToCart(ctx *gin.Context, req model.AddMovieToCartRequest) (err error)
-	GetMoviesInCart(ctx *gin.Context) (movies []model.GetMovieDetailsResponse, err error)
+	GetMoviesInCart(ctx *gin.Context, req model.GetMoviesInCartReq) (movies []model.MovieDetailsInCart, err error)
 }
 
 func NewMovieService(client client.Client, repository repository.MovieRespository) movieService {
@@ -60,7 +60,7 @@ func (ms movieService) AddMovieToCart(ctx *gin.Context, req model.AddMovieToCart
 		return err
 	}
 
-	if err := ms.repository.AddToMovieCart(resp); err != nil {
+	if err := ms.repository.AddToMovieCart(resp, req.UserID); err != nil {
 		log.Println(err)
 		return err
 	}
@@ -68,8 +68,8 @@ func (ms movieService) AddMovieToCart(ctx *gin.Context, req model.AddMovieToCart
 	return nil
 }
 
-func (ms movieService) GetMoviesInCart(ctx *gin.Context) (movies []model.GetMovieDetailsResponse, err error) {
-	movies, dbErr := ms.repository.GetMoviesInCart()
+func (ms movieService) GetMoviesInCart(ctx *gin.Context, req model.GetMoviesInCartReq) (movies []model.MovieDetailsInCart, err error) {
+	movies, dbErr := ms.repository.GetMoviesInCart(req.UserID)
 	if dbErr != nil {
 		log.Println(dbErr)
 		return nil, dbErr

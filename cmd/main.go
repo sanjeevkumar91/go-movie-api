@@ -22,20 +22,29 @@ func main() {
 	configs.LoadConfig(config, constants.ConfigFilePath)
 	dbInstance := db.InitDB()
 	movieRepository := repository.NewMovieRepository(dbInstance)
+	userRespository := repository.NewUserRepository(dbInstance)
 
 	client := client.NewClient(config)
+	userService := service.NewUserService(userRespository)
 	movieService := service.NewMovieService(client, movieRepository)
 	moviesController := controllers.NewMoviesController(movieService)
+	userController := controllers.NewUserController(userService)
 
 	router.GET("/", moviesController.SendMessage)
 	port := config.GetPort()
+
+	usersGroup := router.Group("/users")
+	{
+		usersGroup.POST("/", userController.CreateUser)
+		usersGroup.GET("/", userController.GetUsers)
+	}
 
 	moviesGroup := router.Group("/movies")
 	{
 		moviesGroup.POST("/search", moviesController.SearchMovies)
 		moviesGroup.POST("/", moviesController.GetMovieDetails)
-		moviesGroup.POST("/cart", moviesController.AddToMovieCart)
-		moviesGroup.GET("/cart", moviesController.GetMoviesInCart)
+		moviesGroup.POST("/cart/add", moviesController.AddToMovieCart)
+		moviesGroup.POST("/cart/list", moviesController.GetMoviesInCart)
 	}
 
 	if port == "" {
@@ -44,5 +53,6 @@ func main() {
 
 	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
+		panic(err)
 	}
 }

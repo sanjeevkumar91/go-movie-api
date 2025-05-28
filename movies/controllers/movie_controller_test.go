@@ -158,7 +158,7 @@ func TestAddToMovieCart(t *testing.T) {
 	router, mockService := setupRouter(ctrl)
 
 	t.Run("should add a movie to the cart when movie id is passed", func(t *testing.T) {
-		reqBody := model.AddMovieToCartRequest{MovieID: "tt1375666"}
+		reqBody := model.AddMovieToCartRequest{MovieID: "tt1375666", UserID: "123"}
 
 		mockService.EXPECT().
 			AddMovieToCart(gomock.Any(), reqBody).
@@ -183,7 +183,7 @@ func TestAddToMovieCart(t *testing.T) {
 	})
 
 	t.Run("should return internal server error error when movies end point is failing for any reason", func(t *testing.T) {
-		reqBody := model.AddMovieToCartRequest{MovieID: "tt1234567"}
+		reqBody := model.AddMovieToCartRequest{MovieID: "tt1234567", UserID: "123"}
 
 		mockService.EXPECT().
 			AddMovieToCart(gomock.Any(), reqBody).
@@ -206,15 +206,18 @@ func TestGetMoviesInCart(t *testing.T) {
 	router, mockService := setupRouter(ctrl)
 
 	t.Run("should return the movies details in the cart", func(t *testing.T) {
-		expected := []model.GetMovieDetailsResponse{
+		reqBody := model.GetMoviesInCartReq{UserID: "123"}
+		body, _ := json.Marshal(reqBody)
+
+		expected := []model.MovieDetailsInCart{
 			{Title: "Interstellar", ImdbID: "tt0816692"},
 		}
 
 		mockService.EXPECT().
-			GetMoviesInCart(gomock.Any()).
+			GetMoviesInCart(gomock.Any(), reqBody).
 			Return(expected, nil)
 
-		req := httptest.NewRequest(http.MethodGet, "/cart", nil)
+		req := httptest.NewRequest(http.MethodGet, "/cart", bytes.NewBuffer(body))
 		resp := httptest.NewRecorder()
 
 		router.ServeHTTP(resp, req)
@@ -222,11 +225,13 @@ func TestGetMoviesInCart(t *testing.T) {
 	})
 
 	t.Run("should return internal server error error when movies end point is failing for any reason", func(t *testing.T) {
+		reqBody := model.GetMoviesInCartReq{UserID: "123"}
+		body, _ := json.Marshal(reqBody)
 		mockService.EXPECT().
-			GetMoviesInCart(gomock.Any()).
+			GetMoviesInCart(gomock.Any(), reqBody).
 			Return(nil, errors.New("db failure"))
 
-		req := httptest.NewRequest(http.MethodGet, "/cart", nil)
+		req := httptest.NewRequest(http.MethodGet, "/cart", bytes.NewBuffer(body))
 		resp := httptest.NewRecorder()
 
 		router.ServeHTTP(resp, req)

@@ -3,13 +3,38 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
-    <changeSet id="1" author="sanjeev">
+     <changeSet id="1" author="sanjeev">
         <sql>
             CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
         </sql>
-        <createTable schemaName="public" tableName="movies_cart">
+        <createTable schemaName="public" tableName="users">
             <column name="id" type="uuid" defaultValueComputed="uuid_generate_v4()">
                 <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_name" type="varchar(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)" >
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="country" type="varchar(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamptz" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamptz" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="users"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="2" author="sanjeev">
+        <createTable schemaName="public" tableName="movies_cart">
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
             </column>
             <column name="title" type="varchar(255)" >
                 <constraints unique="true" nullable="false"/>
@@ -20,13 +45,31 @@
             <column name="year" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="genre" type="varchar(255)" />
-            <column name="movie_details" type="jsonb">
+            <column name="genre" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="actors" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="poster" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="added_at" type="timestamptz" defaultValueComputed="NOW()"/>
         </createTable>
         <rollback>
             <dropTable tableName="movies_cart"/>
         </rollback>
+    </changeSet>
+    <changeSet id="3" author="sanjeev">
+        <addForeignKeyConstraint 
+            baseTableName="movies_cart"
+            baseColumnNames="user_id"
+            constraintName="fk_movies_cart_user"
+            referencedTableName="users"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>    
     </changeSet>
 </databaseChangeLog>

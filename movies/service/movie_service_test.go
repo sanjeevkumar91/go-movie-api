@@ -76,8 +76,12 @@ func TestAddMovieToCart(t *testing.T) {
 	svc := NewMovieService(mockClient, mockRepo)
 	ctx := &gin.Context{}
 
-	t.Run("should add movies to cart", func(t *testing.T) {
-		req := model.AddMovieToCartRequest{}
+	t.Run("should add movie to cart successfully", func(t *testing.T) {
+		req := model.AddMovieToCartRequest{
+			UserID:  "123",
+			MovieID: "tt1375666",
+		}
+
 		resp := model.GetMovieDetailsResponse{
 			Title:  "Inception",
 			Year:   "2010",
@@ -86,14 +90,17 @@ func TestAddMovieToCart(t *testing.T) {
 		}
 
 		mockClient.EXPECT().GetMovieDetailsById(ctx, req).Return(resp, nil)
-		mockRepo.EXPECT().AddToMovieCart(resp).Return(nil)
+		mockRepo.EXPECT().AddToMovieCart(resp, req.UserID).Return(nil)
 
 		err := svc.AddMovieToCart(ctx, req)
 		assert.NoError(t, err)
 	})
 
-	t.Run("should return client error when there is client failure", func(t *testing.T) {
-		req := model.AddMovieToCartRequest{}
+	t.Run("should return error when client fails", func(t *testing.T) {
+		req := model.AddMovieToCartRequest{
+			UserID:  "123",
+			MovieID: "tt1375666",
+		}
 
 		mockClient.EXPECT().GetMovieDetailsById(ctx, req).Return(model.GetMovieDetailsResponse{}, errors.New("client error"))
 
@@ -102,8 +109,12 @@ func TestAddMovieToCart(t *testing.T) {
 		assert.Equal(t, "client error", err.Error())
 	})
 
-	t.Run("should return db error when there are is error in adding movie to cart", func(t *testing.T) {
-		req := model.AddMovieToCartRequest{}
+	t.Run("should return error when repo fails", func(t *testing.T) {
+		req := model.AddMovieToCartRequest{
+			UserID:  "123",
+			MovieID: "tt1375666",
+		}
+
 		resp := model.GetMovieDetailsResponse{
 			Title:  "Inception",
 			Year:   "2010",
@@ -112,7 +123,7 @@ func TestAddMovieToCart(t *testing.T) {
 		}
 
 		mockClient.EXPECT().GetMovieDetailsById(ctx, req).Return(resp, nil)
-		mockRepo.EXPECT().AddToMovieCart(resp).Return(errors.New("repo error"))
+		mockRepo.EXPECT().AddToMovieCart(resp, req.UserID).Return(errors.New("repo error"))
 
 		err := svc.AddMovieToCart(ctx, req)
 		assert.Error(t, err)
@@ -186,22 +197,25 @@ func TestGetMoviesInCart(t *testing.T) {
 	ctx := &gin.Context{}
 
 	t.Run("should return movies from database", func(t *testing.T) {
-		expected := []model.GetMovieDetailsResponse{
+		req := model.GetMoviesInCartReq{UserID: "123"}
+		expected := []model.MovieDetailsInCart{
 			{Title: "Inception", Year: "2010", Genre: "Sci-Fi", ImdbID: "tt1375666"},
 		}
 
-		mockRepo.EXPECT().GetMoviesInCart().Return(expected, nil)
+		mockRepo.EXPECT().GetMoviesInCart(req.UserID).Return(expected, nil)
 
-		movies, err := svc.GetMoviesInCart(ctx)
+		movies, err := svc.GetMoviesInCart(ctx, req)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expected, movies)
 	})
 
-	t.Run("should return db errorn when fetch movie details from database", func(t *testing.T) {
-		mockRepo.EXPECT().GetMoviesInCart().Return(nil, errors.New("db error"))
+	t.Run("should return db error when fetch fails", func(t *testing.T) {
+		req := model.GetMoviesInCartReq{UserID: "123"}
 
-		movies, err := svc.GetMoviesInCart(ctx)
+		mockRepo.EXPECT().GetMoviesInCart(req.UserID).Return(nil, errors.New("db error"))
+
+		movies, err := svc.GetMoviesInCart(ctx, req)
 
 		assert.Error(t, err)
 		assert.Nil(t, movies)

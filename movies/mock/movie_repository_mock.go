@@ -41,30 +41,30 @@ func (m *MockMovieRespository) EXPECT() *MockMovieRespositoryMockRecorder {
 }
 
 // AddToMovieCart mocks base method.
-func (m *MockMovieRespository) AddToMovieCart(movie model.GetMovieDetailsResponse) error {
+func (m *MockMovieRespository) AddToMovieCart(movie model.GetMovieDetailsResponse, userId string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddToMovieCart", movie)
+	ret := m.ctrl.Call(m, "AddToMovieCart", movie, userId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddToMovieCart indicates an expected call of AddToMovieCart.
-func (mr *MockMovieRespositoryMockRecorder) AddToMovieCart(movie any) *gomock.Call {
+func (mr *MockMovieRespositoryMockRecorder) AddToMovieCart(movie, userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddToMovieCart", reflect.TypeOf((*MockMovieRespository)(nil).AddToMovieCart), movie)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddToMovieCart", reflect.TypeOf((*MockMovieRespository)(nil).AddToMovieCart), movie, userId)
 }
 
 // GetMoviesInCart mocks base method.
-func (m *MockMovieRespository) GetMoviesInCart() ([]model.GetMovieDetailsResponse, error) {
+func (m *MockMovieRespository) GetMoviesInCart(userId string) ([]model.MovieDetailsInCart, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMoviesInCart")
-	ret0, _ := ret[0].([]model.GetMovieDetailsResponse)
+	ret := m.ctrl.Call(m, "GetMoviesInCart", userId)
+	ret0, _ := ret[0].([]model.MovieDetailsInCart)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetMoviesInCart indicates an expected call of GetMoviesInCart.
-func (mr *MockMovieRespositoryMockRecorder) GetMoviesInCart() *gomock.Call {
+func (mr *MockMovieRespositoryMockRecorder) GetMoviesInCart(userId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMoviesInCart", reflect.TypeOf((*MockMovieRespository)(nil).GetMoviesInCart))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMoviesInCart", reflect.TypeOf((*MockMovieRespository)(nil).GetMoviesInCart), userId)
 }

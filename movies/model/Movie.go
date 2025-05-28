@@ -4,6 +4,7 @@ type Movie struct {
 	Title  string
 	Year   string
 	ImdbID string
+	Actor  string
 	Type   string
 	Poster string
 }
@@ -63,8 +64,23 @@ type GetMovieDetailsRequest struct {
 
 type AddMovieToCartRequest struct {
 	MovieID string `json:"movieId" binding:"required"`
+	UserID  string `json:"userId" binding:"required"`
 }
 
 type AddMovieToCartResponse struct {
 	Status string `json:"status"`
+}
+
+type MovieDetailsInCart struct {
+	Title  string
+	Year   string
+	ImdbID string
+	Actors string
+	Type   string
+	Poster string
+	Genre  string
+}
+
+type GetMoviesInCartReq struct {
+	UserID string `json:"userId"`
 }

@@ -87,7 +87,13 @@ func (mc moviesController) AddToMovieCart(ctx *gin.Context) {
 }
 
 func (mc moviesController) GetMoviesInCart(ctx *gin.Context) {
-	resp, err := mc.movieService.GetMoviesInCart(ctx)
+	var getMoviesInCartReq model.GetMoviesInCartReq
+	if err := ctx.ShouldBindJSON(&getMoviesInCartReq); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := mc.movieService.GetMoviesInCart(ctx, getMoviesInCartReq)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

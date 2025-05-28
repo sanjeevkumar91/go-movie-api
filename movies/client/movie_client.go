@@ -28,113 +28,46 @@ func NewClient(appConfig configs.Config) client {
 func (c client) SearchMovies(ctx *gin.Context, request model.SearchMovieRequest) (model.SearchMovieResponse, error) {
 	log.Println("initiating movies search req", request)
 
-	u, err := url.Parse(c.appConfig.SearchMoviesUrl())
-	if err != nil {
+	queryParams := constructParamsForSearchMovies(request, c.appConfig)
+
+	var searchMovieResponse model.SearchMovieResponse
+	if err := makeGetRequest(c.appConfig.SearchMoviesUrl(), queryParams, &searchMovieResponse); err != nil {
 		log.Println(err)
 		return model.SearchMovieResponse{}, err
 	}
 
-	params := constructParamsForSearchMovies(request, c.appConfig)
-	u.RawQuery = params.Encode()
+	log.Println("fetched response from movies search")
 
-	log.Println("movies req str", u.String())
-
-	req, err := http.NewRequest("GET", u.String(), nil)
-
-	if err != nil {
-		return model.SearchMovieResponse{}, err
-	}
-
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		return model.SearchMovieResponse{}, err
-	}
-
-	var SearchMovieResponse model.SearchMovieResponse
-	if err := json.NewDecoder(resp.Body).Decode(&SearchMovieResponse); err != nil {
-		return model.SearchMovieResponse{}, err
-	}
-
-	log.Println("got response from movies search", resp.StatusCode)
-
-	return SearchMovieResponse, nil
+	return searchMovieResponse, nil
 }
 
 func (c client) GetMovieDetails(ctx *gin.Context, request model.GetMovieDetailsRequest) (model.GetMovieDetailsResponse, error) {
-	log.Println("initiating movies search req", request)
+	log.Println("initiating movie search req", request)
 
-	u, err := url.Parse(c.appConfig.SearchMoviesUrl())
-	if err != nil {
-		log.Println(err)
-		return model.GetMovieDetailsResponse{}, err
-	}
-
-	params := constructParamsForGetMovieDetails(request, c.appConfig)
-	u.RawQuery = params.Encode()
-
-	log.Println("movies req str", u.String())
-
-	req, err := http.NewRequest("GET", u.String(), nil)
-
-	if err != nil {
-		return model.GetMovieDetailsResponse{}, err
-	}
-
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		return model.GetMovieDetailsResponse{}, err
-	}
+	queryParams := constructParamsForGetMovieDetails(request, c.appConfig)
 
 	var movieDetailsResponse model.GetMovieDetailsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&movieDetailsResponse); err != nil {
+	if err := makeGetRequest(c.appConfig.SearchMoviesUrl(), queryParams, &movieDetailsResponse); err != nil {
+		log.Println(err)
 		return model.GetMovieDetailsResponse{}, err
 	}
 
-	log.Println("got response from movies search", resp.StatusCode)
+	log.Println("fetched the movie details successfully")
 
 	return movieDetailsResponse, nil
 }
 
 func (c client) GetMovieDetailsById(ctx *gin.Context, request model.AddMovieToCartRequest) (model.GetMovieDetailsResponse, error) {
-	log.Println("initiating movies search req", request)
+	log.Println("initiating movie search req", request)
 
-	u, err := url.Parse(c.appConfig.SearchMoviesUrl())
-	if err != nil {
-		log.Println(err)
-		return model.GetMovieDetailsResponse{}, err
-	}
-
-	params := constructParamsForGetMovieDetailsById(request, c.appConfig)
-	u.RawQuery = params.Encode()
-
-	log.Println("movies req str", u.String())
-
-	req, err := http.NewRequest("GET", u.String(), nil)
-
-	if err != nil {
-		return model.GetMovieDetailsResponse{}, err
-	}
-
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Println(err)
-		return model.GetMovieDetailsResponse{}, err
-	}
-
+	queryParams := constructParamsForGetMovieDetailsById(request, c.appConfig)
 	var movieDetailsResponse model.GetMovieDetailsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&movieDetailsResponse); err != nil {
+	if err := makeGetRequest(c.appConfig.SearchMoviesUrl(), queryParams, &movieDetailsResponse); err != nil {
+		log.Println(err)
 		return model.GetMovieDetailsResponse{}, err
 	}
 
-	log.Println("got response from movies search", resp.StatusCode)
+	log.Println("fetched movie details for id", request.MovieID)
 
 	return movieDetailsResponse, nil
 }
@@ -188,4 +121,34 @@ func constructParamsForGetMovieDetailsById(request model.AddMovieToCartRequest, 
 		params.Add("i", request.MovieID)
 	}
 	return params
+}
+
+func makeGetRequest(apiUrl string, queryParams url.Values, out any) (err error) {
+	u, err := url.Parse(apiUrl)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	u.RawQuery = queryParams.Encode()
+
+	log.Println("movies req str", u.String())
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return err
+	}
+
+	return nil
 }

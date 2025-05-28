@@ -17,6 +17,7 @@ func InitDB() *sqlx.DB {
 	db, err = sqlx.Connect("postgres", dbConnectStr)
 	if err != nil {
 		log.Fatalf("Database connection failed: %v", err)
+		panic(err)
 	}
 
 	log.Println("Connected to PostgreSQL via sqlx.")

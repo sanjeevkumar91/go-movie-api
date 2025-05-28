@@ -38,10 +38,12 @@ func LoadConfig(config *config, path string) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Could not open the config.json", err)
+		panic(err)
 	}
 	defer file.Close()
 
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
 		log.Fatal("Could not load the config", err)
+		panic(err)
 	}
 }
